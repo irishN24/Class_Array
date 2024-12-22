@@ -25,13 +25,15 @@ public:
     bool Test(); // проверка на упорядоченность++
     bool operator == (Array arr); // оператор равенства недоделана
     void Shell_sort(); //сортировка Шелла
+    void Sift(int* a, int n, int i);
     void HeapSort(); //Пирамидальная сортировка
+    void quick_S(int l, int r);
     void Hoar_Sort(); // Сортировка Хоара
     void Bit_sort(); //Побитовая сортировка
     friend istream& operator >> (istream& is, Array& a); //оператор ввод ++
     friend ostream& operator << (ostream& os, Array& a); //оператор вывод ++
 };
-//конструктор 1
+//конструктор 1 ++
 Array::Array(size_t len, int t, int min_d, int max_d) {
     if (len > 0) { // проверка длины массива
         if (max_d > min_d) { //проверка правильного диапазона
@@ -46,10 +48,11 @@ Array::Array(size_t len, int t, int min_d, int max_d) {
                     sort(a, a + n);
                 }
                 if (t == 3) {
-                    std::sort(a, a + n, greater<int>());
+                    sort(a, a + n, greater<int>());
                 }
                 else if (t > 3 || t < 1){
                     cout << "Incorrect order!!!\n";
+                    exit(-1);
                 }
             }
         }
@@ -58,7 +61,7 @@ Array::Array(size_t len, int t, int min_d, int max_d) {
         }
     }
 }
-//конструктор 2
+//конструктор 2 ++
 Array::Array(int* arr, size_t l) {
     if (arr != nullptr) {
         a = new int[l];
@@ -70,12 +73,12 @@ Array::Array(int* arr, size_t l) {
         }
     }
 }
-//конструктор копирования
+//конструктор копирования ++
 Array::Array(Array& arr) : n(arr.n) { 
     a = new int[n];
     copy(arr.a, arr.a + n, a);
 }
-//оператор присвоения
+//оператор присвоения ++
 Array& Array::operator =(Array& arr) {
     if (this != &arr) {
         delete[] a;
@@ -89,7 +92,7 @@ Array& Array::operator =(Array& arr) {
     }
     return *this;
 }
-//взятие индекса
+//взятие индекса ++
 int& Array::operator[](int i) {
     if (i < 0 || i >= n) {
         std::cout << "\nIndex outside the array!!!" << "\n";
@@ -97,7 +100,7 @@ int& Array::operator[](int i) {
     }
     return a[i];
 }
-//проверка на неупорядоченность
+//проверка на неупорядоченность ++
 bool Array::Test() {
     for (int i = 0; i < n - 1; i++) {
         if (a[i] > a[i + 1]) {
@@ -106,7 +109,7 @@ bool Array::Test() {
     }
     return true;
 }
-//оператор равенства
+//оператор равенства ++
 bool Array::operator == (Array arr) {//массивы равны если у них одинаковые элементы
     if (n != arr.n) {
         return false;
@@ -129,8 +132,97 @@ bool Array::operator == (Array arr) {//массивы равны если у н�
     }
     return true;
 }
+void Array::Shell_sort() {
+    int len = n;
+    for (int step = n / 2; step > 0; step = step / 2) {
+        for (int i = step; i < len; i++) {
+            int tmp = a[i];
+            int j;
+            for (j = i; j >= step; j -= step) {
+                if (tmp < a[j - step])
+                {
+                    a[j] = a[j - step];
 
-istream& operator>>(istream& is, Array &a) { //дружественный ввод
+                    
+            }
+                else {
+                    break;
+                }
+              
+            }
+            a[j] = tmp;
+        }
+    }
+}
+//def shell(data) :
+//    inc = len(data) // 2
+//    while inc :
+//        for i, el in enumerate(data) :
+//            while i >= inc and data[i - inc] > el:
+//data[i] = data[i - inc]
+//i -= inc
+//data[i] = el
+//inc = 1 if inc == 2 else int(inc * 5.0 / 11)
+//return data
+void Array::Sift(int* a, int n, int i) {
+    int j;
+    for (int j = 2 * i + 1; j < n; j++) {
+       if ((j + 1) < n) {
+            if (a[j + 1] > a[j]) {
+                j = j + 1;
+            }
+        }
+        if (a[j] > a[i]) {
+            swap(a[i], a[j]);
+            i = j;
+            j = 2 * i + 1;
+        }
+    }
+}
+
+void Array::HeapSort() {
+    for (int i = (n / 2) - 1; i >= 0; i--) {
+        Sift(a, n, i);
+    }
+    for (int i = n - 1; i > 0; i--) {
+        swap(a[0], a[i]);
+        Sift(a, i, 0);
+    }
+}
+void Array::Hoar_Sort() { // Сортировка Хоара
+    quick_S(0, n - 1);
+}
+void Array::quick_S(int l, int r) {
+    if (l <= r) {
+        int i = l;
+        int j = r;
+        int x = a[(l + r) / 2];
+        while (i <= j) {
+            while (a[i] < x) {
+                i++;
+            }
+            while (a[j] > x) {
+                j--;
+            }
+            if (i <= j) {
+                swap(a[i], a[j]);
+                i++;
+                j--;
+            }
+        }
+        if (l < j) {
+            quick_S(l, j);
+        }
+        if (r > i) {
+            quick_S(i, r);
+        }
+    }
+    else return;
+}
+
+
+
+istream& operator>>(istream& is, Array &a) { //дружественный ввод ++
     int len;
     cout << "Enter size of array: ";
     cin >> len;
@@ -148,7 +240,7 @@ istream& operator>>(istream& is, Array &a) { //дружественный вво
     }
 }
 
-ostream& operator<<(ostream& os, Array& a) { //дружественный вывод
+ostream& operator<<(ostream& os, Array& a) { //дружественный вывод ++
     for (int i = 0; i < a.n; i++) {
         os << a.a[i] << " ";
     }
@@ -158,28 +250,28 @@ ostream& operator<<(ostream& os, Array& a) { //дружественный выв
 
 int main()
 {
-    Array Array1(50, 2, 0, 500);
-    cout << "Array 1: " << Array1 << "\n";
+    Array Array1(50, 1, 0, 500);
+    cout << "Array 1: " << Array1;
     cout << "==========================" << "\n";
 
 
     int arrr[5] = {2,4,7,90,45};
     Array Array2(arrr, 5);
-    cout << "Array 2: " << Array2 << "\n";
+    cout << "Array 2: " << Array2;
     cout << "==========================" << "\n";
 
 
     Array Array3(Array1);
-    cout << "Array 3: " << Array3 << "\n";
+    cout << "Array 3: " << Array3;
     cout << "==========================" << "\n";
 
     Array Array4;
     Array4 = Array2;
-    cout << "Array 4: " << Array4 << "\n";
+    cout << "Array 4: " << Array4;
     cout << "==========================" << "\n";
 
     if (Array1.Test()) {
-        cout << "Array 1 is оrdered\n";
+        cout << "Array 1 is ordered\n";
     }
     else {
         cout << "Array 1 is not ordered\n";
@@ -194,5 +286,17 @@ int main()
     cout << "==========================" << "\n";
     Array Array5;
     cin >> Array5;
-    cout << "Array 5: " << Array5 << "\n";
+    cout << "Array 5: " << Array5;
+    cout << Array5[4] << "\n";
+    Array1.Hoar_Sort();
+    //тут выведем время
+    cout << "Array 1: " << Array1;
+    Array Array6(10, 1, 0, 500);
+    Array6.Shell_sort();
+    //time
+    cout << "Array 6: " << Array6;
+    Array Array7(10, 1, 0, 1000);
+    Array7.HeapSort();
+    //time
+    cout << "Array 7: " << Array7;
 }

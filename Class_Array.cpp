@@ -25,22 +25,21 @@ public:
     bool Test(); // проверка на упорядоченность
     bool operator == (Array arr); // оператор равенства 
     void Shell_sort(); //сортировка Шелла
-    void Sift(int* a, int n, int i);
+    void Sift(int* arr, int n, int i);
     void HeapSort(); //Пирамидальная сортировка
     void quick_S(int l, int r);
     void Hoar_Sort(); // Сортировка Хоара
-    void Bit_sort(); //Побитовая сортировка
+    //void Bit_sort(); //Побитовая сортировка
     friend istream& operator >> (istream& is, Array& a); //оператор ввод
     friend ostream& operator << (ostream& os, Array& a); //оператор вывод
 };
 //конструктор 1
 Array::Array(size_t len, int t, int min_d, int max_d) {
     if (len > 0) { // проверка длины массива
-        if (max_d > min_d) { //проверка правильного диапазона
+        if (max_d >= min_d) { //проверка правильного диапазона
             a = new int[len]; //выделяем память
             if (a != nullptr) {
                 this->n = len; // Инициализируем длину
-                srand(time(NULL));
                 for (int i = 0; i < len; i++) {
                     a[i] = min_d + rand() % (max_d - min_d + 1);
                 }
@@ -50,7 +49,7 @@ Array::Array(size_t len, int t, int min_d, int max_d) {
                 if (t == 3) {
                     sort(a, a + n, greater<int>());
                 }
-                else if (t > 3 || t < 1){
+                else if (t > 3 || t < 1) {
                     cout << "Incorrect order!!!\n";
                     exit(-1);
                 }
@@ -114,23 +113,15 @@ bool Array::operator == (Array arr) {
     if (n != arr.n) {
         return false;
     }
-    int i = 0;
-    while (i < arr.n) {
-        bool flag = false;
-        for (int j = 0; j < n; j++) {
-            if (arr.a[i] == a[j]) {
-                arr.a[i] = arr.a[arr.n - 1];
-                arr.n--;
-                flag = true;
-                break;
-            }
+    Array arrr(*this);
+    sort(arrr.a, arrr.a + arrr.n);
+    sort(arr.a, arr.a + arr.n);
+    for (int i = 0; i < n; i++) {
+        if (arrr[i] == arr.a[i]) {
+            return true;
         }
-        if (!flag) {
-            return false;
-        }
-        i++;
     }
-    return true;
+    return false;
 }
 // Сортировка Шелла
 void Array::Shell_sort() {
@@ -153,19 +144,19 @@ void Array::Shell_sort() {
     }
 }
 //Функция для просеивания
-void Array::Sift(int* a, int n, int i) {
-    int j;
-    for (int j = 2 * i + 1; j < n; j++) {
-        if ((j + 1) < n) {
-            if (a[j + 1] > a[j]) {
-                j = j + 1;
-            }
-        }
-        if (a[j] > a[i]) {
-            a[i] = a[j];
-            i = j;
-            j = 2 * i + 1;
-        }
+void Array::Sift(int *arr, int n, int i) {
+    int j = i; //корень
+    int l = 2 * i + 1;
+    int r = 2 * i + 2;
+    if (l < n && arr[l] > arr[j]) {
+        j = l;
+    }
+    if (r < n && arr[r] > arr[j]) {
+        j = r;
+    }
+    if (j != i) {
+        swap(arr[i], arr[j]);
+        Sift(arr, n, j);
     }
 }
 //Пирамидальная сортировка
@@ -173,7 +164,7 @@ void Array::HeapSort() {
     for (int i = (n / 2) - 1; i >= 0; i--) {
         Sift(a, n, i);
     }
-    for (int i = n - 1; i >= 0; i--) {
+    for (int i = n - 1; i > 0; i--) {
         swap(a[0], a[i]);
         Sift(a, i, 0);
     }
@@ -211,11 +202,15 @@ void Array::quick_S(int l, int r) {
     else return;
 }
 
-istream& operator>>(istream& is, Array &a) { //дружественный ввод
+istream& operator>>(istream& is, Array& a) { //дружественный ввод
     int len;
     cout << "Enter size of array: ";
     cin >> len;
     if (len > 0) {
+        if (a.a != nullptr) {
+            delete[] a.a;
+            a.a = nullptr;
+        }
         a.n = len;
         a.a = new int[len];
         cout << "Enter the array elements:\n";
@@ -238,11 +233,12 @@ ostream& operator<<(ostream& os, Array& a) { //дружественный выв
 
 int main()
 {
-    Array Array1(50, 1, 0, 500);
+    srand(time(NULL));
+    Array Array1(500, 1, -100, 600);
     cout << "Array 1: " << Array1;
     cout << "==========================" << "\n";
 
-    int arrr[5] = {2,4,7,90,45};
+    int arrr[5] = { 2,4,7,90,45 };
     Array Array2(arrr, 5);
     cout << "Array 2: " << Array2;
     cout << "==========================" << "\n";
@@ -274,22 +270,25 @@ int main()
     cin >> Array5;
     cout << "Array 5: " << Array5;
     cout << Array5[4] << "\n";
-/*
-    auto start = steady_clock::now();
-    Array1.Hoar_Sort();
-    auto end = steady_clock::now();
-    cout << "Array 1 in Hoar sort: " << Array1 << "Time: " << duration_cast<nanoseconds>(end - start).count() << " milliseconds\n";
-
     Array Array6(Array1);
-    start = steady_clock::now();
-    Array6.Shell_sort();
-    end = steady_clock::now();
-    cout << "Array 6 in Shell Sort: " << Array6 << "Time: " << duration_cast<nanoseconds>(end - start).count() << " milliseconds\n";
-
+    cout << "Array 6: " << Array6;
     Array Array7(Array1);
-    start = steady_clock::now();
-    Array7.HeapSort();
-    end = steady_clock::now();
-    cout << "Array 7 in Heap Sort: " << Array7 << "Time: " << duration_cast<nanoseconds>(end - start).count() << " milliseconds\n";
-*/
+    cout << "Array 7: " << Array7;
+        auto start = steady_clock::now();
+        Array1.Hoar_Sort();
+        auto end = steady_clock::now();
+        cout << "Array 1 in Hoar sort: " << Array1 << "Time: " << duration_cast<nanoseconds>(end - start).count() << " nanoseconds\n";
+
+        
+        start = steady_clock::now();
+        Array6.Shell_sort();
+        end = steady_clock::now();
+        cout << "Array 6 in Shell Sort: " << Array6 << "Time: " << duration_cast<nanoseconds>(end - start).count() << " nanoseconds\n";
+
+        
+        start = steady_clock::now();
+        Array7.HeapSort();
+        end = steady_clock::now();
+        cout << "Array 7 in Heap Sort: " << Array7 << "Time: " << duration_cast<nanoseconds>(end - start).count() << " nanoseconds\n";
+    
 }
